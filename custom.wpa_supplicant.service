@@ -1,0 +1,13 @@
+[Unit]
+Description=Custom WPA supplicant
+Before=network.target
+Wants=network.target
+After=dbus-fi.w1.wpa_supplicant1.service
+
+[Service]
+Type=simple
+ExecStart=/root/wpa_supplicant.sh
+
+[Install]
+WantedBy=multi-user.target
+Alias=custom.wpa_supplicant.service
