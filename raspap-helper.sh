@@ -3,7 +3,7 @@ apt-get update && apt-get upgrade -y
 
 dpkg -i /opt/linux-headers-next-sun50iw9_1.0.2_arm64.deb
 
-cp 99-wlan.link /etc/systemd/network/99-wlan.link
+cp 70-wlan.link /etc/systemd/network/70-wlan.link
 
 git clone -b v5.2.2.4 https://github.com/lwfinger/rtl8188eu.git rtl8188eu
 cd rtl8188eu
