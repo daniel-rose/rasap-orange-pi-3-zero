@@ -4,14 +4,26 @@ function updateSystem() {
 }
 
 function installRequiredPackages() {
-    apt-get install -y avahi-daemon linux-firmware
+    apt-get install -y avahi-daemon
+}
+
+function installMissingDrivers() {
+    mkdir firmware
+    cd firmware
+    wget -r -nd -e robots=no -A '*.bin' --accept-regex '/plain/' https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/tree/mediatek/
+    mv *.bin /lib/firmware/mediatek/
+    update-initramfs -c -k all
+    cd ..
+    rmdir firmware
 }
 
 function changeHostname() {
+    currentHostname=$(hostname -f)
     read -p "Enter new hostname [campi]: " hostname
     hostname=${hostname:-campi}
 
     hostnamectl set-hostname ${hostname}
+    sed -i "s/$currentHostname/$hostname/g" /etc/hosts
 }
 
 function changeUsbWirelessAdapterName() {
@@ -31,8 +43,31 @@ function installRaspap() {
     curl -sL https://install.raspap.com | bash -s -- -y
 }
 
-updateSystem
-installRequiredPackages
-changeHostname
-changeUsbWirelessAdapterName
-installRaspap
+function init() {
+    updateSystem
+    installRequiredPackages
+    installMissingDrivers
+    reboot
+}
+
+function config() {
+    changeHostname
+    changeUsbWirelessAdapterName
+    installRaspap
+}
+
+if ! [[ $# -eq 1 ]]
+then
+    echo "Usage: $0 init|config"
+    exit
+fi
+
+case "$1" in
+    "init") init
+    ;;
+    "config") config
+    ;;
+
+    *) echo "$1 is an ivalid argument"
+    ;;
+esac
